@@ -43,6 +43,7 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 uint16_t Buttonstate = 0; // store 4x4 button state
+int numafterconvert = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -53,6 +54,8 @@ static void MX_USART2_UART_Init(void);
 
  // declare Function at here
 void ButtonMatrixRead();
+int PinConvertMapping(uint16_t);
+void checkmynumber(int x);
 
 /* USER CODE END PFP */
 
@@ -104,6 +107,8 @@ int main(void)
 
    // Function to read Button
    ButtonMatrixRead();
+   PinConvertMapping(Buttonstate);
+   // checkmynumber(int x);
 
   }
   /* USER CODE END 3 */
@@ -260,23 +265,102 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-// ตัวเก็บ Array ฝั่ง R ใช้คุม port กับ pin
+
+int PinConvertMapping(uint16_t y){
+	switch(y){
+		case 1:
+			numafterconvert = 7;
+			break;
+		case 2:
+			numafterconvert = 8;
+			break;
+		case 4:
+			numafterconvert = 9;
+			break;
+//		case 8:
+//			numafterconvert = 7;
+//			break;
+		case 16:
+			numafterconvert = 4;
+			break;
+		case 32:
+			numafterconvert = 5;
+			break;
+		case 64:
+			numafterconvert = 6;
+			break;
+//		case 128:
+//			numafterconvert = 7;
+//			break;
+		case 256:
+			numafterconvert = 1;
+			break;
+		case 512:
+			numafterconvert = 2;
+			break;
+		case 1024:
+			numafterconvert = 3;
+			break;
+//		case 2048:
+//			numafterconvert = 7;
+//			break;
+		case 4096:
+			numafterconvert = 0;
+			break;
+//		case 8192:
+//			numafterconvert = 7;
+//			break;
+//		case 16384:
+//			numafterconvert = 7;
+//			break;
+//		case 32768:
+//			numafterconvert = 7;
+//			break;
+	}
+	return numafterconvert;
+}
+
+
+// �?ระ�?าศต�?ัว�?�?รอย�?า�?�?ี�?เ�?ราะเอามา�?า�? GPIO_PinState HAL_GPIO_ReadPin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
+
+// ตัวเ�?�?�? Array �?ั�?�? R �?�?�?�?ุม port �?ั�? pin
 GPIO_TypeDef *ButtonMatrixPortR[4] = {R1_GPIO_Port, R2_GPIO_Port, R3_GPIO_Port, R4_GPIO_Port};
 uint16_t ButtonMatrixPinR[4] = {R1_Pin, R2_Pin, R3_Pin, R4_Pin };
 
-// ตัวเก็บ Array ฝั่ง L ใช้คุม port กับ pin
-GPIO_TypeDef *ButtonMatrixPortL[4] = {L1_GPIO_Port, L2_GPIO_Port, L3_GPIO_Port, L4_GPIO_Port};
-uint16_t ButtonMatrixPinL[4] = {L1_Pin, L2_Pin, L3_Pin, L4_Pin };
+// ตัวเ�?�?�? Array �?ั�?�? L �?�?�?�?ุม port �?ั�? pin
+GPIO_TypeDef *ButtonMatrixPortL[4] = {L1_GPIO_Port, L2_GPIO_Port, L3_GPIO_Port, L4_GPIO_Port}; // เ�?�?�?�?�?อมูล GPIO ที�?�?ำลั�?�?ะ�?�?�?�?า�?�?ว�? port A,B,C
+uint16_t ButtonMatrixPinL[4] = {L1_Pin, L2_Pin, L3_Pin, L4_Pin }; // เ�?�?�?�?�?อมูล GPIO ที�?�?ำลั�?�?ะ�?�?�?�?า�?�?ว�? pin มั�?เ�?�?�?ตัวเล�? เ�?�?�? 1 2 3
 
 // Read Button state 4x4 Button
 
 void ButtonMatrixRead()
 {
-	// ให้ function ถูกเรียกทุก 100 ms
+	// �?ห�? function ถู�?เรีย�?ทุ�? 100 ms
 	static uint32_t timeStamp = 0;
+	static uint8_t CurrentL = 0; // เวลาที�? L run อยู�?รั�?ษา�?�?าเอา�?ว�?�?�?�?ั�?�?ุ�?ั�?
 
 	if (HAL_GetTick() - timeStamp >= 100){
 		timeStamp = HAL_GetTick();
+
+		for(int i = 0; i<4;i++){
+			if(HAL_GPIO_ReadPin(ButtonMatrixPortR[i], ButtonMatrixPinR[i])== GPIO_PIN_RESET){ // Press Button
+				// set bit i to 1
+				// i calculate form i(R) and CurrentL to set bit that relate to 4x4 button
+				Buttonstate |= 1 << (i + (CurrentL*4));
+				// ย�?ตัวอย�?า�?�?ุ�?มถู�?�?ด ถ�?า i = 3, currentL = 2 �?ะ�?ด�?ว�?าเรา�?ด�?ุ�?ม K12 อยู�? �?ะ�?ด�?อี�?ว�?า bit ที�? 11 ถู�?เ�?ลี�?ย�?�?ห�?เ�?�?�? 1
+			}
+			else{
+				// set bit i to 0
+				Buttonstate &= ~(1 << (i + (CurrentL*4)));
+			}
+		}
+		// set currentL to Hi-z (Open drain) �?ดยเริ�?มต�?�?�?ล�?วทุ�?�?ถว�?ะเ�?�?�? HI �?ล�?ว�?ถวที�?�?ะหา�?ะเ�?�?�? LOW ว�?�?�?เรื�?อย�?
+		HAL_GPIO_WritePin(ButtonMatrixPortL[CurrentL], ButtonMatrixPinL[CurrentL], GPIO_PIN_SET); // เ�?�?�?�?าร set �?ห�?�?า L เ�?�?�? High �?ว�?�?ดย�?ะ set ทั�?�? column �?อ�?�?ถวตัวเอ�?
+		uint8_t nextL = (CurrentL + 1) %4 ; // เ�?�?�?�?ารเ�?ลี�?ย�?เ�?�?�? column  ต�?อ�?�?เ�?�?�?�?ถว�?หม�? (�?าร mod = �?ารหารเอาเศษ = เ�?�?�?�?าร�?ั�? overflow เ�?ื�?อ�?ห�? reset �?�?เริ�?ม�?ั�?�?�?า�?ถว(row)ที�? 1-4)
+		// set NextL to Low
+		HAL_GPIO_WritePin(ButtonMatrixPortL[nextL], ButtonMatrixPinL[nextL], GPIO_PIN_RESET); // เ�?�?�?�?าร set �?ห�?�?า L เ�?�?�? Low �?ว�?�?ดย�?ะ set ทั�?�? column �?อ�?�?ถว�?หม�?
+		CurrentL = nextL; // หลั�?�?า�? set เสร�?�?�?ล�?ว�?ห�?เอา �?ถว ที�?ถู�? set �?ว�?�?ล�?วมาเ�?ลี�?ย�? เ�?�?�?ตำ�?ห�?�?�?�?ถว�?หม�?�?ห�?ตัวเอ�?
+
 	}
 
 
