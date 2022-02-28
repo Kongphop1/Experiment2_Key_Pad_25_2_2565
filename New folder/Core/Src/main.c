@@ -262,45 +262,28 @@ static void MX_GPIO_Init(void)
 
 // Read Button state 4x4 Button
 
+// ตัวเก็บ Array ฝั่ง R ใช้คุม port กับ pin
 GPIO_TypeDef *ButtonMatrixPortR[4] = {R1_GPIO_Port, R2_GPIO_Port, R3_GPIO_Port, R4_GPIO_Port};
 uint16_t ButtonMatrixPinR[4] = {R1_Pin, R2_Pin, R3_Pin, R4_Pin };
 
+// ตัวเก็บ Array ฝั่ง L ใช้คุม port กับ pin
 GPIO_TypeDef *ButtonMatrixPortL[4] = {L1_GPIO_Port, L2_GPIO_Port, L3_GPIO_Port, L4_GPIO_Port};
 uint16_t ButtonMatrixPinL[4] = {L1_Pin, L2_Pin, L3_Pin, L4_Pin };
 
 
 void ButtonMatrixRead()
 {
- static uint32_t timeStamp = 0;
- static uint8_t CurrentL = 0;
- if (HAL_GetTick() - timeStamp >= 100) // 100 ms
- {
-  timeStamp = HAL_GetTick();
+	// ให้ function ถูกเรียกทุก 100 ms
+	static uint32_t timeStamp = 0;
 
-  for(int i = 0;i<4;i++)
-  {
-   if(HAL_GPIO_ReadPin(ButtonMatrixPortR[i], ButtonMatrixPinR[i]) == GPIO_PIN_RESET) // button press
-   {
-    // set bit to 1
-    Buttonstate |= 1 << (i + (CurrentL*4));
-   }
-   else
-   {
-    // set bit to 0
-    Buttonstate &= ~(1 << (i + (CurrentL*4)));
-   }
-  }
+	if (HAL_GetTick() - timeStamp >= 100){
+		timeStamp = HAL_GetTick();
+	}
 
-  HAL_GPIO_WritePin(ButtonMatrixPortL[CurrentL], ButtonMatrixPinL[CurrentL], GPIO_PIN_SET);
 
-  uint8_t nextL = (CurrentL + 1) % 4;
-  HAL_GPIO_WritePin(ButtonMatrixPortL[nextL], ButtonMatrixPinL[nextL], GPIO_PIN_RESET);
-  CurrentL = nextL;
 
- }
+
 }
-
-
 /* USER CODE END 4 */
 
 /**
