@@ -260,8 +260,6 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-// Read Button state 4x4 Button
-
 // ตัวเก็บ Array ฝั่ง R ใช้คุม port กับ pin
 GPIO_TypeDef *ButtonMatrixPortR[4] = {R1_GPIO_Port, R2_GPIO_Port, R3_GPIO_Port, R4_GPIO_Port};
 uint16_t ButtonMatrixPinR[4] = {R1_Pin, R2_Pin, R3_Pin, R4_Pin };
@@ -270,6 +268,7 @@ uint16_t ButtonMatrixPinR[4] = {R1_Pin, R2_Pin, R3_Pin, R4_Pin };
 GPIO_TypeDef *ButtonMatrixPortL[4] = {L1_GPIO_Port, L2_GPIO_Port, L3_GPIO_Port, L4_GPIO_Port};
 uint16_t ButtonMatrixPinL[4] = {L1_Pin, L2_Pin, L3_Pin, L4_Pin };
 
+// Read Button state 4x4 Button
 
 void ButtonMatrixRead()
 {
