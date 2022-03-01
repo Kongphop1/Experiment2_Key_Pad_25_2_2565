@@ -44,6 +44,7 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 uint16_t Buttonstate = 0; // store 4x4 button state
 int numafterconvert = 0;
+int mynum[11] = {0,0,0,0,0,0,0,0,0,0,0};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -54,7 +55,7 @@ static void MX_USART2_UART_Init(void);
 
  // declare Function at here
 void ButtonMatrixRead();
-int PinConvertMapping(uint16_t);
+int PinConvertMapping(uint16_t y);
 void checkmynumber(int x);
 
 /* USER CODE END PFP */
@@ -104,11 +105,12 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  int k = 0;
 
    // Function to read Button
    ButtonMatrixRead();
-   PinConvertMapping(Buttonstate);
-   // checkmynumber(int x);
+   k = PinConvertMapping(Buttonstate);
+   checkmynumber(k);
 
   }
   /* USER CODE END 3 */
@@ -265,63 +267,6 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-
-int PinConvertMapping(uint16_t y){
-	switch(y){
-		default : 0;
-		case 1:
-			numafterconvert = 7;
-			break;
-		case 2:
-			numafterconvert = 8;
-			break;
-		case 4:
-			numafterconvert = 9;
-			break;
-//		case 8:
-//			numafterconvert = 7;
-//			break;
-		case 16:
-			numafterconvert = 4;
-			break;
-		case 32:
-			numafterconvert = 5;
-			break;
-		case 64:
-			numafterconvert = 6;
-			break;
-//		case 128:
-//			numafterconvert = 7;
-//			break;
-		case 256:
-			numafterconvert = 1;
-			break;
-		case 512:
-			numafterconvert = 2;
-			break;
-		case 1024:
-			numafterconvert = 3;
-			break;
-//		case 2048:
-//			numafterconvert = 7;
-//			break;
-		case 4096:
-			numafterconvert = 0;
-			break;
-//		case 8192:
-//			numafterconvert = 7;
-//			break;
-//		case 16384:
-//			numafterconvert = 7;
-//			break;
-//		case 32768:
-//			numafterconvert = 7;
-//			break;
-	}
-	return numafterconvert;
-}
-
-
 // �?ระ�?าศต�?ัว�?�?รอย�?า�?�?ี�?เ�?ราะเอามา�?า�? GPIO_PinState HAL_GPIO_ReadPin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
 
 // ตัวเ�?�?�? Array �?ั�?�? R �?�?�?�?ุม port �?ั�? pin
@@ -363,11 +308,54 @@ void ButtonMatrixRead()
 		CurrentL = nextL; // หลั�?�?า�? set เสร�?�?�?ล�?ว�?ห�?เอา �?ถว ที�?ถู�? set �?ว�?�?ล�?วมาเ�?ลี�?ย�? เ�?�?�?ตำ�?ห�?�?�?�?ถว�?หม�?�?ห�?ตัวเอ�?
 
 	}
-
-
-
-
 }
+
+int PinConvertMapping(uint16_t y){
+	switch(y){
+		case 1:
+			numafterconvert = 7;
+			break;
+		case 2:
+			numafterconvert = 8;
+			break;
+		case 4:
+			numafterconvert = 9;
+			break;
+		case 16:
+			numafterconvert = 4;
+			break;
+		case 32:
+			numafterconvert = 5;
+			break;
+		case 64:
+			numafterconvert = 6;
+			break;
+		case 256:
+			numafterconvert = 1;
+			break;
+		case 512:
+			numafterconvert = 2;
+			break;
+		case 1024:
+			numafterconvert = 3;
+			break;
+		case 4096:
+			numafterconvert = 0;
+			break;
+		default :
+			numafterconvert = 0;
+	}
+	return numafterconvert;
+}
+
+void checkmynumber(int x){
+	mynum[10] = x;
+
+	if(mynum[0]=6 && mynum[1]=3 && mynum[2]=3 && mynum[3]=4 && mynum[4]=0 && mynum[5]=5 && mynum[6]=0 && mynum[7]=0 && mynum[8]=0 && mynum[9]=0 && mynum[10]=3){
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+	}
+}
+
 /* USER CODE END 4 */
 
 /**
