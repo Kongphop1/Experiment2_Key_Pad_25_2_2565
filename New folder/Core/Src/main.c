@@ -268,6 +268,7 @@ static void MX_GPIO_Init(void)
 
 int PinConvertMapping(uint16_t y){
 	switch(y){
+		default : 0;
 		case 1:
 			numafterconvert = 7;
 			break;
