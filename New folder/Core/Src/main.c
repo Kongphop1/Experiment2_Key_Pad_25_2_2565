@@ -109,8 +109,8 @@ int main(void)
 
    // Function to read Button
    ButtonMatrixRead();
-   k = PinConvertMapping(Buttonstate);
-   checkmynumber(k);
+   //k = PinConvertMapping(Buttonstate);
+   //checkmynumber(k);
 
   }
   /* USER CODE END 3 */
@@ -267,6 +267,89 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+GPIO_TypeDef *BTRport[4] = {R1_GPIO_Port, R2_GPIO_Port, R3_GPIO_Port, R4_GPIO_Port};
+uint16_t BTRpin[4] = {R1_Pin, R2_Pin, R3_Pin, R4_Pin };
+
+GPIO_TypeDef *BTLport[4] = {R1_GPIO_Port, R2_GPIO_Port, R3_GPIO_Port, R4_GPIO_Port};
+uint16_t BTLpin[4] = {R1_Pin, R2_Pin, R3_Pin, R4_Pin };
+
+uint8_t check_p = 1;
+uint8_t count = 0;
+uint8_t pos = 0;
+uint8_t false = 0;
+
+void ButtonMatrixRead(){
+	static uint8_t L = 0;
+	static uint32_t timeStamp = 0;
+	if (HAL_GetTick() - timeStamp >= 100){
+		timeStamp = HAL_GetTick();
+
+		for (int i = 0; i<4; i++){
+			if(HAL_GPIO_ReadPin(BTRport[i], BTRpin[i]) == GPIO_PIN_RESET){
+				pos = i + (L*4);
+				if (pos == 3){
+					L = 0;
+					false = 0;
+					count = 0;
+					check_p = 1;
+					HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+				}
+				else if (pos == 7){
+					false -= 1;
+					count -= 1;
+					if (false == 0){
+						check_p = 1;
+					}
+				}
+				else if (pos == 15){
+					if ((check_p == 1)&&(count == 11)){
+						HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+						L = 0;
+						count = 0;
+						check_p = 1;
+					}
+					else {
+						HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+					}
+				}
+				else if ((pos != 11)&&(pos != 13)&&(pos != 14)){
+					if ((count == 0)&&(pos == 6)){
+						check_p = (check_p&&1);
+					}
+					else if ((count == 1)||(count == 2)||(count == 10)&&(pos == 10)){
+						check_p = (check_p&&1);
+					}
+					else if ((count == 3)&&(pos == 4)){
+						check_p = (check_p&&1);
+					}
+					else if ((count == 4)||(count == 6)||(count == 7)||(count == 8)&&(pos == 12)){
+						check_p = (check_p&&1);
+					}
+					else if ((count == 5)&&(pos == 5)){
+						check_p = (check_p&&1);
+					}
+					else if ((count == 9)&&(pos == 0)){
+						check_p = (check_p&&1);
+					}
+					else {
+						check_p = 0;
+					}
+					if (check_p == 0){
+						false += 1;
+					}
+					count += 1;
+				}
+			}
+		}
+		HAL_GPIO_WritePin(BTLport[L], BTLpin[L], GPIO_PIN_SET);
+		uint8_t L_p = (L+1)%4;
+		HAL_GPIO_WritePin(BTLport[L_p], BTLpin[L_p], GPIO_PIN_RESET);
+		L = L_p;
+
+	}
+}
+
+/*
 // �?ระ�?าศต�?ัว�?�?รอย�?า�?�?ี�?เ�?ราะเอามา�?า�? GPIO_PinState HAL_GPIO_ReadPin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
 
 // ตัวเ�?�?�? Array �?ั�?�? R �?�?�?�?ุม port �?ั�? pin
@@ -355,6 +438,7 @@ void checkmynumber(int x){
 		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 	}
 }
+*/
 
 /* USER CODE END 4 */
 
