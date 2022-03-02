@@ -45,6 +45,7 @@ UART_HandleTypeDef huart2;
 uint16_t Buttonstate = 0; // store 4x4 button state
 int numafterconvert = 0;
 int mynum[11] = {0,0,0,0,0,0,0,0,0,0,0};
+int count = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -109,8 +110,8 @@ int main(void)
 
    // Function to read Button
    ButtonMatrixRead();
-   //k = PinConvertMapping(Buttonstate);
-   //checkmynumber(k);
+   k = PinConvertMapping(Buttonstate);
+   checkmynumber(k);
 
   }
   /* USER CODE END 3 */
@@ -267,6 +268,7 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+/*
 GPIO_TypeDef *BTRport[4] = {R1_GPIO_Port, R2_GPIO_Port, R3_GPIO_Port, R4_GPIO_Port};
 uint16_t BTRpin[4] = {R1_Pin, R2_Pin, R3_Pin, R4_Pin };
 
@@ -348,8 +350,8 @@ void ButtonMatrixRead(){
 
 	}
 }
+*/
 
-/*
 // �?ระ�?าศต�?ัว�?�?รอย�?า�?�?ี�?เ�?ราะเอามา�?า�? GPIO_PinState HAL_GPIO_ReadPin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
 
 // ตัวเ�?�?�? Array �?ั�?�? R �?�?�?�?ุม port �?ั�? pin
@@ -397,33 +399,43 @@ int PinConvertMapping(uint16_t y){
 	switch(y){
 		case 1:
 			numafterconvert = 7;
+			count++;
 			break;
 		case 2:
 			numafterconvert = 8;
+			count++;
 			break;
 		case 4:
 			numafterconvert = 9;
+			count++;
 			break;
 		case 16:
 			numafterconvert = 4;
+			count++;
 			break;
 		case 32:
 			numafterconvert = 5;
+			count++;
 			break;
 		case 64:
 			numafterconvert = 6;
+			count++;
 			break;
 		case 256:
 			numafterconvert = 1;
+			count++;
 			break;
 		case 512:
 			numafterconvert = 2;
+			count++;
 			break;
 		case 1024:
 			numafterconvert = 3;
+			count++;
 			break;
 		case 4096:
 			numafterconvert = 0;
+			count++;
 			break;
 		default :
 			numafterconvert = 0;
@@ -431,14 +443,18 @@ int PinConvertMapping(uint16_t y){
 	return numafterconvert;
 }
 
-void checkmynumber(int x){
-	mynum[10] = x;
 
-	if(mynum[0]=6 && mynum[1]=3 && mynum[2]=3 && mynum[3]=4 && mynum[4]=0 && mynum[5]=5 && mynum[6]=0 && mynum[7]=0 && mynum[8]=0 && mynum[9]=0 && mynum[10]=3){
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+void checkmynumber(int x){
+	if(count >= 10){
+		count = 10;
 	}
+	mynum[count-1] = x;
+
+//	if(mynum[0]=6 && mynum[1]=3 && mynum[2]=3 && mynum[3]=4 && mynum[4]=0 && mynum[5]=5 && mynum[6]=0 && mynum[7]=0 && mynum[8]=0 && mynum[9]=0 && mynum[10]=3){
+//		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+//	}
 }
-*/
+
 
 /* USER CODE END 4 */
 
