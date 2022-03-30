@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -42,7 +42,12 @@
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
+
 uint16_t Buttonstate = 0; // store 4x4 button state
+uint16_t MyPassword[11] = {64,1024,1024,16,4096,32,4096,4096,4096,4096,1024}; // MyPassword 63340500003
+uint16_t CheckPassword[11] = {0,0,0,0,0,0,0,0,0,0,0};
+
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -53,6 +58,7 @@ static void MX_USART2_UART_Init(void);
 
  // declare Function at here
 void ButtonMatrixRead();
+void ComparePassword(uint16_t A[], uint16_t B[]);
 
 /* USER CODE END PFP */
 
@@ -259,7 +265,6 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
 // Read Button state 4x4 Button
 
 GPIO_TypeDef *ButtonMatrixPortR[4] = {R1_GPIO_Port, R2_GPIO_Port, R3_GPIO_Port, R4_GPIO_Port};
@@ -298,6 +303,14 @@ void ButtonMatrixRead()
   CurrentL = nextL;
 
  }
+}
+
+void ComparePassword(uint16_t A[], uint16_t B[]){
+	for (int i=0;i<11;i++){
+		if (A[i] == B[i]){
+
+		}
+	}
 }
 
 
