@@ -43,9 +43,6 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 uint16_t Buttonstate = 0; // store 4x4 button state
-int numafterconvert = 0;
-int mynum[11] = {0,0,0,0,0,0,0,0,0,0,0};
-int count = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -56,8 +53,6 @@ static void MX_USART2_UART_Init(void);
 
  // declare Function at here
 void ButtonMatrixRead();
-int PinConvertMapping(uint16_t y);
-void checkmynumber(int x);
 
 /* USER CODE END PFP */
 
@@ -106,12 +101,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  int k = 0;
 
    // Function to read Button
    ButtonMatrixRead();
-   k = PinConvertMapping(Buttonstate);
-   checkmynumber(k);
 
   }
   /* USER CODE END 3 */
@@ -268,191 +260,44 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-/*
-GPIO_TypeDef *BTRport[4] = {R1_GPIO_Port, R2_GPIO_Port, R3_GPIO_Port, R4_GPIO_Port};
-uint16_t BTRpin[4] = {R1_Pin, R2_Pin, R3_Pin, R4_Pin };
+// Read Button state 4x4 Button
 
-GPIO_TypeDef *BTLport[4] = {R1_GPIO_Port, R2_GPIO_Port, R3_GPIO_Port, R4_GPIO_Port};
-uint16_t BTLpin[4] = {R1_Pin, R2_Pin, R3_Pin, R4_Pin };
-
-uint8_t check_p = 1;
-uint8_t count = 0;
-uint8_t pos = 0;
-uint8_t false = 0;
-
-void ButtonMatrixRead(){
-	static uint8_t L = 0;
-	static uint32_t timeStamp = 0;
-	if (HAL_GetTick() - timeStamp >= 100){
-		timeStamp = HAL_GetTick();
-
-		for (int i = 0; i<4; i++){
-			if(HAL_GPIO_ReadPin(BTRport[i], BTRpin[i]) == GPIO_PIN_RESET){
-				pos = i + (L*4);
-				if (pos == 3){
-					L = 0;
-					false = 0;
-					count = 0;
-					check_p = 1;
-					HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
-				}
-				else if (pos == 7){
-					false -= 1;
-					count -= 1;
-					if (false == 0){
-						check_p = 1;
-					}
-				}
-				else if (pos == 15){
-					if ((check_p == 1)&&(count == 11)){
-						HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
-						L = 0;
-						count = 0;
-						check_p = 1;
-					}
-					else {
-						HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
-					}
-				}
-				else if ((pos != 11)&&(pos != 13)&&(pos != 14)){
-					if ((count == 0)&&(pos == 6)){
-						check_p = (check_p&&1);
-					}
-					else if ((count == 1)||(count == 2)||(count == 10)&&(pos == 10)){
-						check_p = (check_p&&1);
-					}
-					else if ((count == 3)&&(pos == 4)){
-						check_p = (check_p&&1);
-					}
-					else if ((count == 4)||(count == 6)||(count == 7)||(count == 8)&&(pos == 12)){
-						check_p = (check_p&&1);
-					}
-					else if ((count == 5)&&(pos == 5)){
-						check_p = (check_p&&1);
-					}
-					else if ((count == 9)&&(pos == 0)){
-						check_p = (check_p&&1);
-					}
-					else {
-						check_p = 0;
-					}
-					if (check_p == 0){
-						false += 1;
-					}
-					count += 1;
-				}
-			}
-		}
-		HAL_GPIO_WritePin(BTLport[L], BTLpin[L], GPIO_PIN_SET);
-		uint8_t L_p = (L+1)%4;
-		HAL_GPIO_WritePin(BTLport[L_p], BTLpin[L_p], GPIO_PIN_RESET);
-		L = L_p;
-
-	}
-}
-*/
-
-// �?ระ�?าศต�?ัว�?�?รอย�?า�?�?ี�?เ�?ราะเอามา�?า�? GPIO_PinState HAL_GPIO_ReadPin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
-
-// ตัวเ�?�?�? Array �?ั�?�? R �?�?�?�?ุม port �?ั�? pin
 GPIO_TypeDef *ButtonMatrixPortR[4] = {R1_GPIO_Port, R2_GPIO_Port, R3_GPIO_Port, R4_GPIO_Port};
 uint16_t ButtonMatrixPinR[4] = {R1_Pin, R2_Pin, R3_Pin, R4_Pin };
 
-// ตัวเ�?�?�? Array �?ั�?�? L �?�?�?�?ุม port �?ั�? pin
-GPIO_TypeDef *ButtonMatrixPortL[4] = {L1_GPIO_Port, L2_GPIO_Port, L3_GPIO_Port, L4_GPIO_Port}; // เ�?�?�?�?�?อมูล GPIO ที�?�?ำลั�?�?ะ�?�?�?�?า�?�?ว�? port A,B,C
-uint16_t ButtonMatrixPinL[4] = {L1_Pin, L2_Pin, L3_Pin, L4_Pin }; // เ�?�?�?�?�?อมูล GPIO ที�?�?ำลั�?�?ะ�?�?�?�?า�?�?ว�? pin มั�?เ�?�?�?ตัวเล�? เ�?�?�? 1 2 3
+GPIO_TypeDef *ButtonMatrixPortL[4] = {L1_GPIO_Port, L2_GPIO_Port, L3_GPIO_Port, L4_GPIO_Port};
+uint16_t ButtonMatrixPinL[4] = {L1_Pin, L2_Pin, L3_Pin, L4_Pin };
 
-// Read Button state 4x4 Button
 
 void ButtonMatrixRead()
 {
-	// �?ห�? function ถู�?เรีย�?ทุ�? 100 ms
-	static uint32_t timeStamp = 0;
-	static uint8_t CurrentL = 0; // เวลาที�? L run อยู�?รั�?ษา�?�?าเอา�?ว�?�?�?�?ั�?�?ุ�?ั�?
+ static uint32_t timeStamp = 0;
+ static uint8_t CurrentL = 0;
+ if (HAL_GetTick() - timeStamp >= 100) // 100 ms
+ {
+  timeStamp = HAL_GetTick();
 
-	if (HAL_GetTick() - timeStamp >= 100){
-		timeStamp = HAL_GetTick();
+  for(int i = 0;i<4;i++)
+  {
+   if(HAL_GPIO_ReadPin(ButtonMatrixPortR[i], ButtonMatrixPinR[i]) == GPIO_PIN_RESET) // button press
+   {
+    // set bit to 1
+    Buttonstate |= 1 << (i + (CurrentL*4));
+   }
+   else
+   {
+    // set bit to 0
+    Buttonstate &= ~(1 << (i + (CurrentL*4)));
+   }
+  }
 
-		for(int i = 0; i<4;i++){
-			if(HAL_GPIO_ReadPin(ButtonMatrixPortR[i], ButtonMatrixPinR[i])== GPIO_PIN_RESET){ // Press Button
-				// set bit i to 1
-				// i calculate form i(R) and CurrentL to set bit that relate to 4x4 button
-				Buttonstate |= 1 << (i + (CurrentL*4));
-				// ย�?ตัวอย�?า�?�?ุ�?มถู�?�?ด ถ�?า i = 3, currentL = 2 �?ะ�?ด�?ว�?าเรา�?ด�?ุ�?ม K12 อยู�? �?ะ�?ด�?อี�?ว�?า bit ที�? 11 ถู�?เ�?ลี�?ย�?�?ห�?เ�?�?�? 1
-			}
-			else{
-				// set bit i to 0
-				Buttonstate &= ~(1 << (i + (CurrentL*4)));
-			}
-		}
-		// set currentL to Hi-z (Open drain) �?ดยเริ�?มต�?�?�?ล�?วทุ�?�?ถว�?ะเ�?�?�? HI �?ล�?ว�?ถวที�?�?ะหา�?ะเ�?�?�? LOW ว�?�?�?เรื�?อย�?
-		HAL_GPIO_WritePin(ButtonMatrixPortL[CurrentL], ButtonMatrixPinL[CurrentL], GPIO_PIN_SET); // เ�?�?�?�?าร set �?ห�?�?า L เ�?�?�? High �?ว�?�?ดย�?ะ set ทั�?�? column �?อ�?�?ถวตัวเอ�?
-		uint8_t nextL = (CurrentL + 1) %4 ; // เ�?�?�?�?ารเ�?ลี�?ย�?เ�?�?�? column  ต�?อ�?�?เ�?�?�?�?ถว�?หม�? (�?าร mod = �?ารหารเอาเศษ = เ�?�?�?�?าร�?ั�? overflow เ�?ื�?อ�?ห�? reset �?�?เริ�?ม�?ั�?�?�?า�?ถว(row)ที�? 1-4)
-		// set NextL to Low
-		HAL_GPIO_WritePin(ButtonMatrixPortL[nextL], ButtonMatrixPinL[nextL], GPIO_PIN_RESET); // เ�?�?�?�?าร set �?ห�?�?า L เ�?�?�? Low �?ว�?�?ดย�?ะ set ทั�?�? column �?อ�?�?ถว�?หม�?
-		CurrentL = nextL; // หลั�?�?า�? set เสร�?�?�?ล�?ว�?ห�?เอา �?ถว ที�?ถู�? set �?ว�?�?ล�?วมาเ�?ลี�?ย�? เ�?�?�?ตำ�?ห�?�?�?�?ถว�?หม�?�?ห�?ตัวเอ�?
+  HAL_GPIO_WritePin(ButtonMatrixPortL[CurrentL], ButtonMatrixPinL[CurrentL], GPIO_PIN_SET);
 
-	}
-}
+  uint8_t nextL = (CurrentL + 1) % 4;
+  HAL_GPIO_WritePin(ButtonMatrixPortL[nextL], ButtonMatrixPinL[nextL], GPIO_PIN_RESET);
+  CurrentL = nextL;
 
-int PinConvertMapping(uint16_t y){
-	switch(y){
-		case 1:
-			numafterconvert = 7;
-			count++;
-			break;
-		case 2:
-			numafterconvert = 8;
-			count++;
-			break;
-		case 4:
-			numafterconvert = 9;
-			count++;
-			break;
-		case 16:
-			numafterconvert = 4;
-			count++;
-			break;
-		case 32:
-			numafterconvert = 5;
-			count++;
-			break;
-		case 64:
-			numafterconvert = 6;
-			count++;
-			break;
-		case 256:
-			numafterconvert = 1;
-			count++;
-			break;
-		case 512:
-			numafterconvert = 2;
-			count++;
-			break;
-		case 1024:
-			numafterconvert = 3;
-			count++;
-			break;
-		case 4096:
-			numafterconvert = 0;
-			count++;
-			break;
-		default :
-			numafterconvert = 0;
-	}
-	return numafterconvert;
-}
-
-
-void checkmynumber(int x){
-	if(count >= 10){
-		count = 10;
-	}
-	mynum[count-1] = x;
-
-//	if(mynum[0]=6 && mynum[1]=3 && mynum[2]=3 && mynum[3]=4 && mynum[4]=0 && mynum[5]=5 && mynum[6]=0 && mynum[7]=0 && mynum[8]=0 && mynum[9]=0 && mynum[10]=3){
-//		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-//	}
+ }
 }
 
 
