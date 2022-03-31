@@ -347,38 +347,6 @@ void ButtonMatrixRead(){
 	}
 }
 
-/*
-void ButtonMatrixRead()
-{
- static uint32_t timeStamp = 0;
- static uint8_t CurrentL = 0;
- if (HAL_GetTick() - timeStamp >= 100) // 100 ms
- {
-  timeStamp = HAL_GetTick();
-
-  for(int i = 0;i<4;i++)
-  {
-   if(HAL_GPIO_ReadPin(ButtonMatrixPortR[i], ButtonMatrixPinR[i]) == GPIO_PIN_RESET) // button press
-   {
-    // set bit to 1
-    Buttonstate |= 1 << (i + (CurrentL*4));
-   }
-   else
-   {
-    // set bit to 0
-    Buttonstate &= ~(1 << (i + (CurrentL*4)));
-   }
-  }
-
-  HAL_GPIO_WritePin(ButtonMatrixPortL[CurrentL], ButtonMatrixPinL[CurrentL], GPIO_PIN_SET);
-
-  uint8_t nextL = (CurrentL + 1) % 4;
-  HAL_GPIO_WritePin(ButtonMatrixPortL[nextL], ButtonMatrixPinL[nextL], GPIO_PIN_RESET);
-  CurrentL = nextL;
-
- }
-}
-*/
 
 /* USER CODE END 4 */
 
