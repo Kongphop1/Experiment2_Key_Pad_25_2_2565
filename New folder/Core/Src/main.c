@@ -58,7 +58,8 @@ static void MX_USART2_UART_Init(void);
 
  // declare Function at here
 void ButtonMatrixRead();
-void ComparePassword(uint16_t A[], uint16_t B[]);
+int ComparePassword(uint16_t A[], uint16_t B[]);
+void UpdatePasswordinArray(uint16_t numstate);
 
 /* USER CODE END PFP */
 
@@ -265,6 +266,37 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+int ComparePassword(uint16_t A[], uint16_t B[]){	// for checking and return in comparision in if condition to 1 to continue the code
+	 for(int i = 0; i < 11; i++) {
+	   if (A[i] != B[i]) return 0; // fail to compare (compare 11 times to find the error if error don't continue compare)
+	 }
+	 return 1; // complete to compare (only one round to finish compare = if don't have any error can finish run)
+}
+
+void UpdatePasswordinArray(uint16_t numstate){
+	if(numstate == 8){	// press clear button
+		for (int i = 0;i<11;i++){	//clear all password
+			CheckPassword[i] = 0;
+		}
+		HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);	// if you define the name of pin you can use that name = or you can you GPIOA , GPIO_PIN_5 is the same as once
+	}
+	else if (numstate == 32768) { // press ok button
+		if (ComparePassword(CheckPassword,MyPassword)){
+			HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+		}
+	}
+	else if (numstate != 8 && numstate != 128 && numstate != 2048 && numstate != 32768 && numstate != 16384 && numstate != 8192) { // press any button that isn't clear/backspace/ok button to store the numstate in the CheckPassword
+		for (int i = 0;i<11;i++){
+			if (CheckPassword[i] == 0){
+				CheckPassword[i] = numstate;
+				break;
+			}
+		}
+	}
+}
+
+
 // Read Button state 4x4 Button
 
 GPIO_TypeDef *ButtonMatrixPortR[4] = {R1_GPIO_Port, R2_GPIO_Port, R3_GPIO_Port, R4_GPIO_Port};
@@ -273,7 +305,36 @@ uint16_t ButtonMatrixPinR[4] = {R1_Pin, R2_Pin, R3_Pin, R4_Pin };
 GPIO_TypeDef *ButtonMatrixPortL[4] = {L1_GPIO_Port, L2_GPIO_Port, L3_GPIO_Port, L4_GPIO_Port};
 uint16_t ButtonMatrixPinL[4] = {L1_Pin, L2_Pin, L3_Pin, L4_Pin };
 
+void ButtonMatrixRead(){
+	static uint32_t timeStamp = 0;
+	static uint8_t CurrentL = 0;
+	static uint8_t entry = 1;
+	// called reader every 100 ms
+	if(HAL_GetTick() - timeStamp >= 10){
+		timeStamp = HAL_GetTick();
+		if (Buttonstate == 0){
+			entry = 1;		//rest enter
+		}
+		for (int i=0; i<4; i++){
+			if (HAL_GPIO_ReadPin(ButtonMatrixPortR[i], ButtonMatrixPinR[i]) == GPIO_PIN_RESET){	// button is pressed
+				Buttonstate |= 1 << (i + CurrentL*4);
+				if (entry){	// 1 push button 1 count only in while loop
+					UpdatePasswordinArray(Buttonstate);
+					entry = 0;
+				}
+			}
+			else {
+				Buttonstate &= ~(1 << (i + CurrentL*4));
+			}
+		}
+		HAL_GPIO_WritePin(ButtonMatrixPortL[CurrentL], ButtonMatrixPinL[CurrentL], GPIO_PIN_SET);
+		uint8_t nextL = (CurrentL + 1) % 4;
+		HAL_GPIO_WritePin(ButtonMatrixPortL[nextL], ButtonMatrixPinL[nextL], GPIO_PIN_RESET);
+		CurrentL = nextL;
+	}
+}
 
+/*
 void ButtonMatrixRead()
 {
  static uint32_t timeStamp = 0;
@@ -304,15 +365,7 @@ void ButtonMatrixRead()
 
  }
 }
-
-void ComparePassword(uint16_t A[], uint16_t B[]){
-	for (int i=0;i<11;i++){
-		if (A[i] == B[i]){
-
-		}
-	}
-}
-
+*/
 
 /* USER CODE END 4 */
 
