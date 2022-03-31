@@ -43,9 +43,13 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
+//uint8_t can store 0 to 255
+//uint16_t can store -32,768 to 32,767
+
 uint16_t Buttonstate = 0; // store 4x4 button state
 uint16_t MyPassword[11] = {64,1024,1024,16,4096,32,4096,4096,4096,4096,1024}; // MyPassword 63340500003
 uint16_t CheckPassword[11] = {0,0,0,0,0,0,0,0,0,0,0};
+uint16_t count = 0;
 
 
 /* USER CODE END PV */
@@ -280,21 +284,30 @@ void UpdatePasswordinArray(uint16_t numstate){
 			CheckPassword[i] = 0;
 		}
 		HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);	// if you define the name of pin you can use that name = or you can you GPIOA , GPIO_PIN_5 is the same as once
+		count = 0;
 	}
 	else if (numstate == 32768) { // press ok button
 		if (ComparePassword(CheckPassword,MyPassword)){
 			HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
 		}
 	}
+	else if(numstate == 128){ // press backspace
+		count--;
+		CheckPassword[count] = 0;
+	}
 	else if (numstate != 8 && numstate != 128 && numstate != 2048 && numstate != 32768 && numstate != 16384 && numstate != 8192) { // press any button that isn't clear/backspace/ok button to store the numstate in the CheckPassword
 		for (int i = 0;i<11;i++){
 			if (CheckPassword[i] == 0){
 				CheckPassword[i] = numstate;
+				count++;
 				break;
 			}
 		}
 	}
 }
+
+// use else if for continue check in first if statement
+// use if if for new check the state
 
 
 // Read Button state 4x4 Button
